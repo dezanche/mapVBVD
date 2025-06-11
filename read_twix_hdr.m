@@ -12,6 +12,7 @@ function [prot,rstraj] = read_twix_hdr(fid)
     for b=1:nbuffers
         %now read string up to null termination     
         bufname = fread(fid, 10, 'uint8=>char').';
+        bufname(! isascii (bufname)) = [];   % (ND) removes non-ascii characters to fix errors in Octave
         bufname = regexp(bufname, '^\w*', 'match');
         bufname = bufname{1};
         fseek(fid, numel(bufname)-9, 'cof');        
@@ -131,7 +132,8 @@ function mrprot = parse_ascconv(buffer)
         breaked = false;
         for k=1:numel(v)
             if isOctave
-                vk = v{k};
+                %vk = v{k};  % (ND) Octave error: struct cannot be indexed with {
+                vk = v(k);
                 if iscell(vk.name)
                     % lazy fix that throws some info away
                     vk.name = vk.name{1};
