@@ -6,13 +6,17 @@ function [prot,rstraj] = read_twix_hdr(fid)
 % Author: Philipp Ehses MPI Tuebingen, Mar/11/2014
 % email: philipp.ehses@dzne.de
       
+    isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+    
     nbuffers = fread(fid, 1,'uint32');
     
     prot = [];
     for b=1:nbuffers
         %now read string up to null termination     
         bufname = fread(fid, 10, 'uint8=>char').';
-        bufname(! isascii (bufname)) = [];   % (ND) removes non-ascii characters to fix errors in Octave
+        if isOctave
+              bufname(~isascii (bufname)) = [];   % (ND) removes non-ascii characters to fix errors in Octave
+        end
         bufname = regexp(bufname, '^\w*', 'match');
         bufname = bufname{1};
         fseek(fid, numel(bufname)-9, 'cof');        
